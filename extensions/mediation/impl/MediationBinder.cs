@@ -135,7 +135,9 @@ namespace strange.extensions.mediation.impl
 
 					Type typeToInject = (binding.abstraction == null || binding.abstraction.Equals(BindingConst.NULLOID)) ? viewType : binding.abstraction as Type;
 					injectionBinder.Bind (typeToInject).ToValue (view).ToInject(false);
-					injectionBinder.injector.Inject (mediator);
+                    injectionBinder.StartScope(view);
+                    injectionBinder.injector.Inject(mediator);
+                    injectionBinder.EndScope();
 					injectionBinder.Unbind(typeToInject);
 					if (mediator is IMediator)
 						((IMediator)mediator).OnRegister ();

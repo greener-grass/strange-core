@@ -29,24 +29,64 @@ using strange.framework.api;
 using strange.extensions.injector.api;
 using strange.extensions.reflector.impl;
 using strange.framework.impl;
+using strange.extensions.mediation.api;
 
 namespace strange.extensions.injector.impl
 {
 	public class InjectionBinder : Binder, IInjectionBinder
 	{
 		private IInjector _injector;
+        private IScopedBinding _currentScope;
+        private Dictionary<IView, IScopedBinding> _scopedBindings;
 
 		public InjectionBinder ()
 		{
 			injector = new Injector ();
 			injector.binder = this;
 			injector.reflector = new ReflectionBinder ();
+            _scopedBindings = new Dictionary<IView, IScopedBinding>();
 		}
 
 		public object GetInstance(Type key)
 		{
 			return GetInstance(key, null);
 		}
+
+        public void AddScope(IView scopeId, IScopedBinding scope)
+        {
+            if (_scopedBindings.ContainsKey(scopeId))
+            {
+                throw new InjectionException("Scope already exists. Cannot add it twice", InjectionExceptionType.NO_BINDER);
+            }
+            _scopedBindings[scopeId] = scope;
+        }
+
+        public void StartScope(IView scopeId)
+        {
+            if (_currentScope != null)
+            {
+                throw new InjectionException("Scope already started. Cannot start a new one", InjectionExceptionType.NO_BINDER);
+            }
+
+            if (!_scopedBindings.ContainsKey(scopeId))
+            {
+                return;
+            }
+
+            _currentScope = _scopedBindings[scopeId];
+            _currentScope.Start(this);
+        }
+
+        public void EndScope()
+        {
+            if (_currentScope == null)
+            {
+                return;
+                //throw new InjectionException("No scope started. Cannot end scope.", InjectionExceptionType.NO_BINDER);
+            }
+            _currentScope.End(this);
+            _currentScope = null;
+        }
 
 		public virtual object GetInstance(Type key, object name)
 		{

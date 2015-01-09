@@ -60,6 +60,7 @@
 using System;
 using System.Collections.Generic;
 using strange.framework.api;
+using strange.extensions.mediation.api;
 
 namespace strange.extensions.injector.api
 {
@@ -107,6 +108,9 @@ namespace strange.extensions.injector.api
 		void Unbind (object key);
 		void Unbind (object key, object name);
 		void Unbind (IBinding binding);
+        void AddScope(IView scopeId, IScopedBinding scope);
+        void StartScope(IView scopeId);
+        void EndScope();
 	}
 }
 
