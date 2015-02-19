@@ -49,10 +49,18 @@ namespace strange.extensions.listBind.impl
 
         public new IInjectionBinding To<T>()
         {
-            var binding = injectionBinder.Bind(ListItemType).To<T>().ToName(typeof(T).ToString());
+            IInjectionBinding binding;
+            if (typeof (T).IsInterface)
+            {
+                binding = injectionBinder.GetBinding<T>();
+            }
+            else
+            {
+                binding = injectionBinder.Bind(ListItemType).To<T>().ToName(typeof(T).ToString());
+            }
+            
             bindings.Add(binding);
             return binding;
-
         }
 
         public IInjectionBinding ToValue(object o)
